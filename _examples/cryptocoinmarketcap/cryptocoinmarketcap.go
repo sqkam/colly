@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/csv"
+	"github.com/sqkma/colly/v2"
 	"log"
 	"os"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/sqkam/colly/v2"
 )
 
 func main() {

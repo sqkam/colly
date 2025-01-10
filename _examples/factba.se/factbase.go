@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/sqkam/colly/v2"
 )
 
 var baseSearchURL = "https://factba.se/json/json-transcript.php?q=&f=&dt=&p="
