@@ -106,7 +106,7 @@ func main() {
 	c.OnHTML("html", func(e *colly.HTMLElement) {
 		d := c.Clone()
 		d.OnResponse(func(r *colly.Response) {
-			requestIds = queryIdPattern.FindAll(r.Body, -1)
+			requestIds = queryIdPattern.FindAll(r.Body(), -1)
 			requestID = string(requestIds[1][9:41])
 		})
 		requestIDURL := e.Request.AbsoluteURL(e.ChildAttr(`link[as="script"]`, "href"))
@@ -146,7 +146,7 @@ func main() {
 	})
 
 	c.OnError(func(r *colly.Response, e error) {
-		log.Println("error:", e, r.Request.URL, string(r.Body))
+		log.Println("error:", e, r.Request.URL, string(r.Body()))
 	})
 
 	c.OnResponse(func(r *colly.Response) {
@@ -160,7 +160,7 @@ func main() {
 		}
 
 		data := &nextPageData{}
-		err := json.Unmarshal(r.Body, data)
+		err := json.Unmarshal(r.Body(), data)
 		if err != nil {
 			log.Fatal(err)
 		}

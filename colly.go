@@ -40,10 +40,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/antchfx/htmlquery"
 	"github.com/antchfx/xmlquery"
-	"github.com/sqkam/colly/v2/debug"
-	"github.com/sqkam/colly/v2/storage"
 	"github.com/kennygrant/sanitize"
 	whatwgUrl "github.com/nlnwa/whatwg-url/url"
+	"github.com/sqkam/colly/v2/debug"
+	"github.com/sqkam/colly/v2/storage"
 	"github.com/temoto/robotstxt"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -712,6 +712,12 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 	if proxyURL, ok := req.Context().Value(ProxyURLKey).(string); ok {
 		request.ProxyURL = proxyURL
 	}
+	if err == nil {
+		defer func() {
+			response.BodyBuffer.Reset()
+			pool.Put(response.BodyBuffer)
+		}()
+	}
 	if err := c.handleOnError(response, err, request, ctx); err != nil {
 		return err
 	}
@@ -1123,7 +1129,7 @@ func (c *Collector) handleOnHTML(resp *Response) error {
 
 	contentType := resp.Headers.Get("Content-Type")
 	if contentType == "" {
-		contentType = http.DetectContentType(resp.Body)
+		contentType = http.DetectContentType(resp.Body())
 	}
 	// implementation of mime.ParseMediaType without parsing the params
 	// part
@@ -1138,7 +1144,7 @@ func (c *Collector) handleOnHTML(resp *Response) error {
 		return nil
 	}
 
-	doc, err := goquery.NewDocumentFromReader(bytes.NewBuffer(resp.Body))
+	doc, err := goquery.NewDocumentFromReader(bytes.NewBuffer(resp.Body()))
 	if err != nil {
 		return err
 	}
@@ -1182,7 +1188,7 @@ func (c *Collector) handleOnXML(resp *Response) error {
 	}
 
 	if strings.Contains(contentType, "html") {
-		doc, err := htmlquery.Parse(bytes.NewBuffer(resp.Body))
+		doc, err := htmlquery.Parse(bytes.NewBuffer(resp.Body()))
 		if err != nil {
 			return err
 		}
@@ -1211,7 +1217,7 @@ func (c *Collector) handleOnXML(resp *Response) error {
 			}
 		}
 	} else if strings.Contains(contentType, "xml") || isXMLFile {
-		doc, err := xmlquery.Parse(bytes.NewBuffer(resp.Body))
+		doc, err := xmlquery.Parse(bytes.NewBuffer(resp.Body()))
 		if err != nil {
 			return err
 		}

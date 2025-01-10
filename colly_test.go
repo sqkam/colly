@@ -442,7 +442,7 @@ func TestNoAcceptHeader(t *testing.T) {
 	func() {
 		c := NewCollector()
 		c.OnResponse(func(resp *Response) {
-			receivedHeader = string(resp.Body)
+			receivedHeader = string(resp.Body())
 		})
 		c.Visit(ts.URL + "/accept_header")
 		if receivedHeader != "*/*" {
@@ -457,7 +457,7 @@ func TestNoAcceptHeader(t *testing.T) {
 			r.Headers.Del("Accept")
 		})
 		c.OnResponse(func(resp *Response) {
-			receivedHeader = string(resp.Body)
+			receivedHeader = string(resp.Body())
 		})
 		c.Visit(ts.URL + "/accept_header")
 		if receivedHeader != "" {
@@ -496,7 +496,7 @@ func TestCollectorVisit(t *testing.T) {
 			t.Error("Failed to retrieve context value for key 'x'")
 		}
 
-		if !bytes.Equal(r.Body, serverIndexResponse) {
+		if !bytes.Equal(r.Body(), serverIndexResponse) {
 			t.Error("Response body does not match with the original content")
 		}
 	})
@@ -700,7 +700,7 @@ func TestCollectorPostRevisit(t *testing.T) {
 
 	c := NewCollector()
 	c.OnResponse(func(r *Response) {
-		if postValue != string(r.Body) {
+		if postValue != string(r.Body()) {
 			t.Error("Failed to send data with POST")
 		}
 		visitCount++
@@ -801,7 +801,7 @@ func TestSetCookieRedirect(t *testing.T) {
 			defer ts.Close()
 			c := NewCollector()
 			c.OnResponse(func(r *Response) {
-				if got, want := r.Body, serverIndexResponse; !bytes.Equal(got, want) {
+				if got, want := r.Body(), serverIndexResponse; !bytes.Equal(got, want) {
 					t.Errorf("bad response body got=%q want=%q", got, want)
 				}
 				if got, want := r.StatusCode, http.StatusOK; got != want {
@@ -902,7 +902,7 @@ func TestCollectorPost(t *testing.T) {
 	c := NewCollector()
 
 	c.OnResponse(func(r *Response) {
-		if postValue != string(r.Body) {
+		if postValue != string(r.Body()) {
 			t.Error("Failed to send data with POST")
 		}
 	})
@@ -920,7 +920,7 @@ func TestCollectorPostRaw(t *testing.T) {
 	c := NewCollector()
 
 	c.OnResponse(func(r *Response) {
-		if postValue != string(r.Body) {
+		if postValue != string(r.Body()) {
 			t.Error("Failed to send data with POST")
 		}
 	})
@@ -938,7 +938,7 @@ func TestCollectorPostRawRevisit(t *testing.T) {
 
 	c := NewCollector()
 	c.OnResponse(func(r *Response) {
-		if postValue != string(r.Body) {
+		if postValue != string(r.Body()) {
 			t.Error("Failed to send data with POST RAW")
 		}
 		visitCount++
@@ -1246,7 +1246,7 @@ func TestEnvSettings(t *testing.T) {
 	valid := false
 
 	c.OnResponse(func(resp *Response) {
-		if string(resp.Body) == "test" {
+		if string(resp.Body()) == "test" {
 			valid = true
 		}
 	})
@@ -1271,7 +1271,7 @@ func TestUserAgent(t *testing.T) {
 	func() {
 		c := NewCollector()
 		c.OnResponse(func(resp *Response) {
-			receivedUserAgent = string(resp.Body)
+			receivedUserAgent = string(resp.Body())
 		})
 		c.Visit(ts.URL + "/user_agent")
 		if got, want := receivedUserAgent, defaultUserAgent; got != want {
@@ -1281,7 +1281,7 @@ func TestUserAgent(t *testing.T) {
 	func() {
 		c := NewCollector(UserAgent(exampleUserAgent1))
 		c.OnResponse(func(resp *Response) {
-			receivedUserAgent = string(resp.Body)
+			receivedUserAgent = string(resp.Body())
 		})
 		c.Visit(ts.URL + "/user_agent")
 		if got, want := receivedUserAgent, exampleUserAgent1; got != want {
@@ -1291,7 +1291,7 @@ func TestUserAgent(t *testing.T) {
 	func() {
 		c := NewCollector(UserAgent(exampleUserAgent1))
 		c.OnResponse(func(resp *Response) {
-			receivedUserAgent = string(resp.Body)
+			receivedUserAgent = string(resp.Body())
 		})
 
 		c.Request("GET", ts.URL+"/user_agent", nil, nil, nil)
@@ -1302,7 +1302,7 @@ func TestUserAgent(t *testing.T) {
 	func() {
 		c := NewCollector(UserAgent(exampleUserAgent1))
 		c.OnResponse(func(resp *Response) {
-			receivedUserAgent = string(resp.Body)
+			receivedUserAgent = string(resp.Body())
 		})
 
 		c.Request("GET", ts.URL+"/user_agent", nil, nil, http.Header{})
@@ -1313,7 +1313,7 @@ func TestUserAgent(t *testing.T) {
 	func() {
 		c := NewCollector(UserAgent(exampleUserAgent1))
 		c.OnResponse(func(resp *Response) {
-			receivedUserAgent = string(resp.Body)
+			receivedUserAgent = string(resp.Body())
 		})
 		hdr := http.Header{}
 		hdr.Set("User-Agent", "")
@@ -1326,7 +1326,7 @@ func TestUserAgent(t *testing.T) {
 	func() {
 		c := NewCollector(UserAgent(exampleUserAgent1))
 		c.OnResponse(func(resp *Response) {
-			receivedUserAgent = string(resp.Body)
+			receivedUserAgent = string(resp.Body())
 		})
 		hdr := http.Header{}
 		hdr.Set("User-Agent", exampleUserAgent2)
@@ -1352,7 +1352,7 @@ func TestHeaders(t *testing.T) {
 			Headers(map[string]string{"Host": exampleHostHeader}),
 		)
 		c.OnResponse(func(resp *Response) {
-			receivedHeader = string(resp.Body)
+			receivedHeader = string(resp.Body())
 		})
 		c.Visit(ts.URL + "/host_header")
 		if got, want := receivedHeader, exampleHostHeader; got != want {
@@ -1364,7 +1364,7 @@ func TestHeaders(t *testing.T) {
 			Headers(map[string]string{"Test": exampleTestHeader}),
 		)
 		c.OnResponse(func(resp *Response) {
-			receivedHeader = string(resp.Body)
+			receivedHeader = string(resp.Body())
 		})
 		c.Visit(ts.URL + "/custom_header")
 		if got, want := receivedHeader, exampleTestHeader; got != want {
@@ -1749,7 +1749,7 @@ func TestCollectorPostRetry(t *testing.T) {
 			_ = r.Request.Retry()
 			return
 		}
-		if postValue != string(r.Body) {
+		if postValue != string(r.Body()) {
 			t.Error("Failed to send data with POST")
 		}
 		try = true
@@ -1775,7 +1775,7 @@ func TestCollectorGetRetry(t *testing.T) {
 			_ = r.Request.Retry()
 			return
 		}
-		if !bytes.Equal(r.Body, serverIndexResponse) {
+		if !bytes.Equal(r.Body(), serverIndexResponse) {
 			t.Error("Response body does not match with the original content")
 		}
 		try = true
@@ -1795,7 +1795,7 @@ func TestCollectorPostRetryUnseekable(t *testing.T) {
 	c := NewCollector()
 
 	c.OnResponse(func(r *Response) {
-		if postValue != string(r.Body) {
+		if postValue != string(r.Body()) {
 			t.Error("Failed to send data with POST")
 		}
 

@@ -31,8 +31,8 @@ import (
 type Response struct {
 	// StatusCode is the status code of the Response
 	StatusCode int
-	// Body is the content of the Response
-	Body []byte
+	// BodyBuffer is the content of the Response
+	BodyBuffer *bytes.Buffer
 	// Ctx is a context between a Request and a Response
 	Ctx *Context
 	// Request is the Request object of the response
@@ -44,9 +44,13 @@ type Response struct {
 	Trace *HTTPTrace
 }
 
+func (r *Response) Body() []byte {
+	return r.BodyBuffer.Bytes()
+}
+
 // Save writes response body to disk
 func (r *Response) Save(fileName string) error {
-	return os.WriteFile(fileName, r.Body, 0644)
+	return os.WriteFile(fileName, r.Body(), 0644)
 }
 
 // FileName returns the sanitized file name parsed from "Content-Disposition"
@@ -63,15 +67,15 @@ func (r *Response) FileName() string {
 }
 
 func (r *Response) fixCharset(detectCharset bool, defaultEncoding string) error {
-	if len(r.Body) == 0 {
+	if len(r.Body()) == 0 {
 		return nil
 	}
 	if defaultEncoding != "" {
-		tmpBody, err := encodeBytes(r.Body, "text/plain; charset="+defaultEncoding)
+		tmpBody, err := encodeBytes(r.Body(), "text/plain; charset="+defaultEncoding)
 		if err != nil {
 			return err
 		}
-		r.Body = tmpBody
+		r.BodyBuffer = bytes.NewBuffer(tmpBody)
 		return nil
 	}
 	contentType := strings.ToLower(r.Headers.Get("Content-Type"))
@@ -90,7 +94,7 @@ func (r *Response) fixCharset(detectCharset bool, defaultEncoding string) error 
 			return nil
 		}
 		d := chardet.NewTextDetector()
-		r, err := d.DetectBest(r.Body)
+		r, err := d.DetectBest(r.Body())
 		if err != nil {
 			return err
 		}
@@ -99,11 +103,11 @@ func (r *Response) fixCharset(detectCharset bool, defaultEncoding string) error 
 	if strings.Contains(contentType, "utf-8") || strings.Contains(contentType, "utf8") {
 		return nil
 	}
-	tmpBody, err := encodeBytes(r.Body, contentType)
+	tmpBody, err := encodeBytes(r.Body(), contentType)
 	if err != nil {
 		return err
 	}
-	r.Body = tmpBody
+	r.BodyBuffer = bytes.NewBuffer(tmpBody)
 	return nil
 }
 

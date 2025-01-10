@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/csv"
-	"github.com/sqkma/colly/v2"
+
 	"log"
 	"os"
 

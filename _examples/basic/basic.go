@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/sqkma/colly/v2"
 
 	"github.com/sqkam/colly/v2"
 )

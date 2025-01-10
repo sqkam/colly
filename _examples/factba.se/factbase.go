@@ -51,7 +51,7 @@ func main() {
 	stop := false
 	c.OnResponse(func(r *colly.Response) {
 		rs := &results{}
-		err := json.Unmarshal(r.Body, rs)
+		err := json.Unmarshal(r.Body(), rs)
 		if err != nil || len(rs.Data) == 0 {
 			stop = true
 			return

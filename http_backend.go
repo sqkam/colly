@@ -15,6 +15,7 @@
 package colly
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/gob"
 	"encoding/hex"
@@ -208,13 +209,15 @@ func (h *httpBackend) Do(request *http.Request, bodySize int, checkHeadersFunc c
 		}
 		defer bodyReader.(*gzip.Reader).Close()
 	}
-	body, err := io.ReadAll(bodyReader)
+	bf := pool.Get().(*bytes.Buffer)
+
+	_, err = io.Copy(bf, bodyReader)
 	if err != nil {
 		return nil, err
 	}
 	return &Response{
 		StatusCode: res.StatusCode,
-		Body:       body,
+		BodyBuffer: bf,
 		Headers:    &res.Header,
 	}, nil
 }
