@@ -715,7 +715,12 @@ func (c *Collector) fetch(u, method string, depth int, requestData io.Reader, ct
 	if err == nil {
 		defer func() {
 			response.BodyBuffer.Reset()
-			pool.Put(response.BodyBuffer)
+			if response.BodyBuffer.Cap() > 64*1024 {
+				response.BodyBuffer = nil
+			} else {
+				pool.Put(response.BodyBuffer)
+			}
+
 		}()
 	}
 	if err := c.handleOnError(response, err, request, ctx); err != nil {
